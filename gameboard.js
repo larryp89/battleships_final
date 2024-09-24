@@ -9,21 +9,19 @@ class Gameboard {
       Array(GRID_SIZE).fill(null)
     );
     this.allShips = [];
-    this.allSunk = false;
     this.init();
   }
   // Initialise ships
   init() {
-    this.allShips.push(new Ship(5, "Aircraft carrier"));
-    this.allShips.push(new Ship(4, "Battleship"));
-    this.allShips.push(new Ship(3, "Destroyer"));
-    this.allShips.push(new Ship(3, "Sub"));
-    this.allShips.push(new Ship(2, "Patrol boat"));
+    this.allShips.push(new Ship(5));
+    this.allShips.push(new Ship(4));
+    this.allShips.push(new Ship(3));
+    this.allShips.push(new Ship(3));
+    this.allShips.push(new Ship(2));
   }
 
   checkAllSunk() {
-    return this.allShips.every((ship) => ship.sunk === true);
-    
+    return this.allShips.every((ship) => ship.isSunk() === true);
   }
 
   getCoordinate(x, y) {
@@ -35,12 +33,11 @@ class Gameboard {
   }
 
   checkOnGrid(x, y) {
-    if (x < 0 || x > 9 || y < 0 || y > 9) return false;
-    return true;
+    return x >= 0 && x < GRID_SIZE && y >= 0 && y < GRID_SIZE;
   }
 
-  checkValidPlacement(shipLength, x, y, isHorizontal) {
-    for (let i = 0; i < shipLength; i++) {
+  checkValidPlacement(ship, x, y, isHorizontal) {
+    for (let i = 0; i < ship.length; i++) {
       // If it's not on the grid or it's not free, return false
       if (!this.checkOnGrid(x, y) || !this.checkFree(x, y)) {
         return false;
@@ -60,8 +57,8 @@ class Gameboard {
     const shipLength = ship.length;
 
     // If the placement will be valid
-    if (this.checkValidPlacement(shipLength, x, y, isHorizontal)) {
-      for (let i = 0; i < shipLength; i++) {
+    if (this.checkValidPlacement(ship, x, y, isHorizontal)) {
+      for (let i = 0; i < ship.length; i++) {
         // Update the grid location with ship
         this.updateGrid(x, y, ship);
         if (isHorizontal) {
