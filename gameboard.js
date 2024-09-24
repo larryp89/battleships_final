@@ -105,4 +105,4 @@ class Gameboard {
   }
 }
 
-export { Gameboard };
+export { Gameboard, GRID_SIZE };
