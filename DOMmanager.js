@@ -20,8 +20,8 @@ class DOMManager {
 
   bindMethods() {
     this.boundStartGameHandler = this.handleStartGame.bind(this);
-    this.boundSetHover = this.setHighlight.bind(this);
-    this.boundRemoveHighlight = this.removeHighlight.bind(this);
+    this.boundSetHover = this.setHover.bind(this);
+    this.boundRemoveHover = this.removeHover.bind(this);
     this.boundPlaceShip = this.placeShip.bind(this);
   }
 
@@ -42,6 +42,19 @@ class DOMManager {
     this.setGridEventListeners(p1Grid);
   }
 
+  playGame() {
+    console.log("Okay");
+  }
+
+  removeEventHandlers(gridClass) {
+    const grid = document.querySelector(`.${gridClass}`);
+    if (grid) {
+      grid.removeEventListener("mouseover", this.boundSetHover);
+      grid.removeEventListener("mouseout", this.boundRemoveHover);
+      grid.removeEventListener("click", this.boundPlaceShip);
+    }
+  }
+
   showFirstBoard(board) {
     const container = document.createElement("div");
     container.className = "container";
@@ -52,7 +65,7 @@ class DOMManager {
     this.main.appendChild(container);
   }
 
-  setHighlight(event) {
+  setHover(event) {
     if (!event.target.classList.contains("grid-cell")) return;
     if (event.target.classList.contains("placed")) return;
 
@@ -96,12 +109,16 @@ class DOMManager {
     const currentShip = this.getShip(player);
     if (player.gameboard.placeShip(currentShip, x, y, this.isHorizontal)) {
       console.log("Ship placed");
-      console.log(player.gameboard.grid);
+      this.showPlacedShips(player.gameboard.grid);
       this.shipIndex++;
     } else {
       console.log("INVALID");
     }
-    this.showPlacedShips(player.gameboard.grid);
+
+    if (this.checkAllShipsPlaced()) {
+      this.removeEventHandlers("p1-grid");
+      this.playGame();
+    }
   }
 
   // Add grey background to placed ships
@@ -121,7 +138,11 @@ class DOMManager {
     return player.gameboard.allShips[this.shipIndex];
   }
 
-  removeHighlight() {
+  checkAllShipsPlaced() {
+    return this.shipIndex === 5;
+  }
+
+  removeHover() {
     this.highlightedCells.forEach((cell) => {
       cell.style.backgroundColor = "";
     });
@@ -129,6 +150,7 @@ class DOMManager {
 
   // Get the coordinates from DOM grid-cell
   getCellCoordinates(cell) {
+    if (!cell) return;
     const coordinates = cell.getAttribute("data-coords");
     const [x, y] = coordinates.split(",").map(Number);
     return [x, y];
@@ -139,15 +161,9 @@ class DOMManager {
     return cell;
   }
 
-  // Update a grid-cell based on its gameboard.grid content
-  updateGridCell(cell) {
-    const [x, y] = this.getCellCoordinates(cell);
-    console.log(x, y);
-  }
-
   setGridEventListeners(grid) {
     grid.addEventListener("mouseover", this.boundSetHover);
-    grid.addEventListener("mouseout", this.boundRemoveHighlight);
+    grid.addEventListener("mouseout", this.boundRemoveHover);
     grid.addEventListener("click", this.boundPlaceShip);
   }
 
