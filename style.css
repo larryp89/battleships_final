@@ -167,3 +167,7 @@ form {
 .highlight {
   background-color: green;
 }
+
+.placed {
+    background-color: var(--dark-color);
+}

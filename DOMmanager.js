@@ -1,4 +1,5 @@
 import { Gameboard, GRID_SIZE } from "./gameboard";
+import { Ship } from "./ship";
 
 class DOMManager {
   constructor(player1, player2) {
@@ -53,6 +54,7 @@ class DOMManager {
 
   setHighlight(event) {
     if (!event.target.classList.contains("grid-cell")) return;
+    if (event.target.classList.contains("placed")) return;
 
     // Get the ship from the array
     const ship = this.getShip(this.currentPlayer);
@@ -62,9 +64,7 @@ class DOMManager {
     let [x, y] = this.getCellCoordinates(event.target);
 
     for (let i = 0; i < shipLength; i++) {
-      const cellToHighlight = document.querySelector(
-        `[data-coords="${x},${y}"]`
-      );
+      const cellToHighlight = this.getGridCellFromCoords(x, y);
       if (cellToHighlight) {
         this.highlightedCells.push(cellToHighlight);
       }
@@ -74,7 +74,10 @@ class DOMManager {
         y++;
       }
     }
-    if (this.highlightedCells.length < shipLength) {
+    if (
+      this.highlightedCells.length < shipLength ||
+      this.highlightedCells.some((cell) => cell.classList.contains("placed"))
+    ) {
       this.highlightedCells[0].style.backgroundColor = "red";
     } else {
       this.highlightedCells.forEach((cell) => {
@@ -98,6 +101,20 @@ class DOMManager {
     } else {
       console.log("INVALID");
     }
+    this.showPlacedShips(player.gameboard.grid);
+  }
+
+  // Add grey background to placed ships
+  showPlacedShips(grid) {
+    // Iterate through array and extract coordinates
+    for (let x = 0; x < GRID_SIZE; x++) {
+      for (let y = 0; y < GRID_SIZE; y++) {
+        if (grid[y][x] instanceof Ship) {
+          const cell = this.getGridCellFromCoords(x, y);
+          cell.classList.add("placed");
+        }
+      }
+    }
   }
 
   getShip(player) {
@@ -110,10 +127,22 @@ class DOMManager {
     });
   }
 
+  // Get the coordinates from DOM grid-cell
   getCellCoordinates(cell) {
     const coordinates = cell.getAttribute("data-coords");
     const [x, y] = coordinates.split(",").map(Number);
     return [x, y];
+  }
+
+  getGridCellFromCoords(x, y) {
+    const cell = document.querySelector(`[data-coords="${x},${y}"]`);
+    return cell;
+  }
+
+  // Update a grid-cell based on its gameboard.grid content
+  updateGridCell(cell) {
+    const [x, y] = this.getCellCoordinates(cell);
+    console.log(x, y);
   }
 
   setGridEventListeners(grid) {
