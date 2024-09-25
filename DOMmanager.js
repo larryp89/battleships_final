@@ -190,8 +190,18 @@ class DOMManager {
     const container = document.createElement("div");
     container.className = "container";
     const instruction = document.createElement("h2");
+
+    const rotateButton = document.createElement("button");
+    rotateButton.textContent = "Rotate ship";
+    rotateButton.className = "button";
+
+    rotateButton.addEventListener("click", () => {
+      this.isHorizontal = !this.isHorizontal;
+    });
+
     instruction.textContent = "Place your ships";
     container.appendChild(instruction);
+    container.appendChild(rotateButton);
     container.appendChild(board);
     this.main.appendChild(container);
   }
@@ -296,6 +306,36 @@ class DOMManager {
   getGridCellFromCoords(x, y) {
     const cell = document.querySelector(`[data-coords="${x},${y}"]`);
     return cell;
+  }
+  showPlayAgain() {
+    const dialog = document.createElement("dialog");
+    const playAgainButton = document.createElement("button");
+    playAgainButton.textContent = "Play again";
+    playAgainButton.className = "button";
+    dialog.appendChild(playAgainButton);
+    this.main.append(dialog);
+
+    // Show the dialog
+    dialog.showModal();
+
+    // Add an event listener to restart the game when the button is clicked
+    playAgainButton.addEventListener("click", () => {
+      this.restartGame(dialog); // Pass the dialog to close it after restart
+    });
+  }
+
+  restartGame(dialog) {
+    this.player1.gameboard.reset();
+    this.player2.gameboard.reset();
+    this.shipIndex = 0;
+    this.currentPlayer = this.player1;
+    this.clearMain(); // Clear the main content
+
+    // Close the dialog
+    dialog.close();
+
+    // Restart the ship placement and game setup
+    this.handleStartGame({ preventDefault: () => {} });
   }
 }
 export { DOMManager };
