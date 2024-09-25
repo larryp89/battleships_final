@@ -14,12 +14,14 @@ class DOMManager {
     this.main = document.querySelector("main");
     this.highlightedCells = [];
     this.shipIndex = 0;
+    this.isHorizontal = true;
   }
 
   bindMethods() {
     this.boundStartGameHandler = this.handleStartGame.bind(this);
-    this.boundSetHover = this.setHover.bind(this);
+    this.boundSetHover = this.setHighlight.bind(this);
     this.boundRemoveHighlight = this.removeHighlight.bind(this);
+    this.boundPlaceShip = this.placeShip.bind(this);
   }
 
   setEventListeners() {
@@ -49,27 +51,75 @@ class DOMManager {
     this.main.appendChild(container);
   }
 
-  setHover(event) {
+  setHighlight(event) {
     if (!event.target.classList.contains("grid-cell")) return;
 
     // Get the ship from the array
-    const ship = this.currentPlayer.gameboard.allShips[this.shipIndex];
+    const ship = this.getShip(this.currentPlayer);
+    const shipLength = ship.length;
+    this.highlightedCells = [];
 
-    let highlightedCells = [];
+    let [x, y] = this.getCellCoordinates(event.target);
 
-    const currentCell = event.target;
-    currentCell.style.backgroundColor = "red";
+    for (let i = 0; i < shipLength; i++) {
+      const cellToHighlight = document.querySelector(
+        `[data-coords="${x},${y}"]`
+      );
+      if (cellToHighlight) {
+        this.highlightedCells.push(cellToHighlight);
+      }
+      if (this.isHorizontal) {
+        x++;
+      } else {
+        y++;
+      }
+    }
+    if (this.highlightedCells.length < shipLength) {
+      this.highlightedCells[0].style.backgroundColor = "red";
+    } else {
+      this.highlightedCells.forEach((cell) => {
+        cell.style.backgroundColor = "green";
+      });
+    }
   }
 
-  removeHighlight(event) {
-    const currentCell = event.target;
-    currentCell.style.backgroundColor = "";
+  placeShip(event) {
+    // If it will be a valid ship placement for the first cell
+    const player = this.currentPlayer;
+    const targetCell = event.target;
+    const [x, y] = this.getCellCoordinates(targetCell);
+
+    // Get current ship and check can place on gameboard
+    const currentShip = this.getShip(player);
+    if (player.gameboard.placeShip(currentShip, x, y, this.isHorizontal)) {
+      console.log("Ship placed");
+      console.log(player.gameboard.grid);
+      this.shipIndex++;
+    } else {
+      console.log("INVALID");
+    }
+  }
+
+  getShip(player) {
+    return player.gameboard.allShips[this.shipIndex];
+  }
+
+  removeHighlight() {
+    this.highlightedCells.forEach((cell) => {
+      cell.style.backgroundColor = "";
+    });
+  }
+
+  getCellCoordinates(cell) {
+    const coordinates = cell.getAttribute("data-coords");
+    const [x, y] = coordinates.split(",").map(Number);
+    return [x, y];
   }
 
   setGridEventListeners(grid) {
     grid.addEventListener("mouseover", this.boundSetHover);
     grid.addEventListener("mouseout", this.boundRemoveHighlight);
-    // grid.addEventListener("click", this.boundClickHandler);
+    grid.addEventListener("click", this.boundPlaceShip);
   }
 
   // Build grid with usable class names and attributes
@@ -82,7 +132,7 @@ class DOMManager {
       for (let y = 0; y < GRID_SIZE; y++) {
         const gridCell = document.createElement("div");
         gridCell.className = "grid-cell";
-        gridCell.setAttribute("data-coord", `${y}${x}`);
+        gridCell.setAttribute("data-coords", `${y},${x}`);
         playerGrid.appendChild(gridCell);
       }
     }
