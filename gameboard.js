@@ -103,6 +103,14 @@ class Gameboard {
       }
     });
   }
+
+  reset() {
+    this.grid = Array.from({ length: GRID_SIZE }, () =>
+      Array(GRID_SIZE).fill(null)
+    );
+    this.allShips = [];
+    this.init();
+  }
 }
 
 export { Gameboard, GRID_SIZE };

@@ -42,7 +42,7 @@ class DOMManager {
 
       if (this.isGameOver(this.player2)) {
         alert("GAME OVER YOU WIN");
-        // Something to check if play again
+        this.showPlayAgain();
         return;
       }
     } else {
@@ -53,6 +53,7 @@ class DOMManager {
       this.makeAIMove();
       if (this.isGameOver(this.player1)) {
         alert("YOU LOSE");
+        this.showPlayAgain();
       }
     }, 1000);
   }
@@ -325,6 +326,7 @@ class DOMManager {
   }
 
   restartGame(dialog) {
+    // Reset player1 and player2 gameboards and other necessary properties
     this.player1.gameboard.reset();
     this.player2.gameboard.reset();
     this.shipIndex = 0;
