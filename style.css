@@ -164,10 +164,22 @@ form {
   background-color: #b9c8ca;
 }
 
+.container {
+  display: flex;
+  gap: 5rem;
+}
 .highlight {
   background-color: green;
 }
 
 .placed {
-    background-color: var(--dark-color);
+  background-color: var(--dark-color);
+}
+
+.attacked {
+  background-color: var(--danger-color);
+}
+
+.missed {
+  background-color: var(--info-color);
 }

@@ -16,6 +16,8 @@ class DOMManager {
     this.highlightedCells = [];
     this.shipIndex = 0;
     this.isHorizontal = true;
+    this.player1Grid;
+    this.player2Grid;
   }
 
   bindMethods() {
@@ -37,13 +39,79 @@ class DOMManager {
   handleStartGame(e) {
     e.preventDefault();
     this.clearMain();
-    const p1Grid = this.buildGrid(this.player1, "p1-grid");
-    this.showFirstBoard(p1Grid);
-    this.setGridEventListeners(p1Grid);
+    // const p1Grid = this.buildGrid(this.player1, "p1-grid");
+    this.player1Grid = this.renderGrid(this.player1, "p1-grid");
+    this.showFirstBoard(this.player1Grid);
+    this.setGridEventListeners(this.player1Grid);
   }
 
   playGame() {
-    console.log("Okay");
+    this.clearContainer();
+    this.renderBothBoards();
+    this.updateUIGrid(this.player1);
+    this.updateUIGrid(this.player2);
+    // generate AIboard
+  }
+
+  clearContainer() {
+    const container = document.querySelector(".container");
+    if (container) {
+      container.innerHTML = "";
+    }
+  }
+
+  renderBothBoards() {
+    const container =
+      document.querySelector(".container") || document.createElement("div");
+    container.className = "container";
+
+    this.player1Grid = this.renderGrid(this.player1, "p1-grid");
+    this.player2Grid = this.renderGrid(this.player2, "p2-grid");
+
+    container.appendChild(this.player1Grid);
+    container.appendChild(this.player2Grid);
+
+    this.main.appendChild(container);
+  }
+
+  renderGrid(player, classname) {
+    const gameboardGrid = player.gameboard.grid;
+    const UIGrid = document.createElement("div");
+    UIGrid.className = classname; // Remove the dot before the classname
+    UIGrid.classList.add("player-grid");
+
+    for (let x = 0; x < GRID_SIZE; x++) {
+      for (let y = 0; y < GRID_SIZE; y++) {
+        const gridCell = document.createElement("div");
+        gridCell.className = "grid-cell";
+        gridCell.setAttribute("data-coords", `${y},${x}`);
+        UIGrid.appendChild(gridCell);
+      }
+    }
+    return UIGrid;
+  }
+
+  updateUIGrid(player) {
+    const gridClass = player === this.player1 ? "p1-grid" : "p2-grid";
+    const grid = document.querySelector(`.${gridClass}`);
+
+    for (let x = 0; x < GRID_SIZE; x++) {
+      for (let y = 0; y < GRID_SIZE; y++) {
+        const content = player.gameboard.getCoordinate(y, x);
+        const gridCell = grid.querySelector(`[data-coords="${y},${x}"]`);
+
+        if (gridCell) {
+          gridCell.className = "grid-cell"; // Reset classes
+          if (content instanceof Ship) {
+            gridCell.classList.add("placed");
+          } else if (content === "HIT") {
+            gridCell.classList.add("attacked");
+          } else if (content === "MISS") {
+            gridCell.classList.add("missed");
+          }
+        }
+      }
+    }
   }
 
   removeEventHandlers(gridClass) {
@@ -100,19 +168,27 @@ class DOMManager {
   }
 
   placeShip(event) {
-    // If it will be a valid ship placement for the first cell
-    const player = this.currentPlayer;
     const targetCell = event.target;
-    const [x, y] = this.getCellCoordinates(targetCell);
 
-    // Get current ship and check can place on gameboard
+    // Ensure the clicked element is a valid grid cell with data-coords attribute
+    if (
+      !targetCell.classList.contains("grid-cell") ||
+      !targetCell.getAttribute("data-coords")
+    ) {
+      return; // Do nothing if clicked outside the grid or on an invalid target
+    }
+
+    const [x, y] = this.getCellCoordinates(targetCell);
+    const player = this.currentPlayer;
     const currentShip = this.getShip(player);
+
+    // Try to place the ship
     if (player.gameboard.placeShip(currentShip, x, y, this.isHorizontal)) {
       console.log("Ship placed");
       this.showPlacedShips(player.gameboard.grid);
       this.shipIndex++;
     } else {
-      console.log("INVALID");
+      console.log("Invalid placement");
     }
 
     if (this.checkAllShipsPlaced()) {
@@ -165,23 +241,6 @@ class DOMManager {
     grid.addEventListener("mouseover", this.boundSetHover);
     grid.addEventListener("mouseout", this.boundRemoveHover);
     grid.addEventListener("click", this.boundPlaceShip);
-  }
-
-  // Build grid with usable class names and attributes
-  buildGrid(player, classname) {
-    const playerGrid = document.createElement("div");
-    playerGrid.className = classname;
-    playerGrid.classList.add("player-grid");
-
-    for (let x = 0; x < GRID_SIZE; x++) {
-      for (let y = 0; y < GRID_SIZE; y++) {
-        const gridCell = document.createElement("div");
-        gridCell.className = "grid-cell";
-        gridCell.setAttribute("data-coords", `${y},${x}`);
-        playerGrid.appendChild(gridCell);
-      }
-    }
-    return playerGrid;
   }
 }
 export { DOMManager };
