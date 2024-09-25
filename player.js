@@ -7,7 +7,7 @@ class Player {
     this.strategy = strategy;
   }
 
-  makeMove(oppBoard, x, y) {
+  makeMove(oppBoard, x = 0, y = 0) {
     return this.strategy.makeMove(oppBoard, x, y);
   }
 }
@@ -21,8 +21,13 @@ class HumanStrategy {
 
 class AIStrategy {
   makeMove(oppBoard) {
-    const { x, y } = this.easyAttack();
-    return oppBoard.receiveAttack(x, y);
+    let result;
+    do {
+      let { x, y } = this.easyAttack();
+      result = oppBoard.receiveAttack(x, y);
+    } while (!result);
+
+    return result;
   }
 
   easyAttack() {

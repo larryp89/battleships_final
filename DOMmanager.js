@@ -5,7 +5,7 @@ class DOMManager {
   constructor(player1, player2) {
     this.initProperties(player1, player2);
     this.bindMethods();
-    this.setEventListeners();
+    this.setStartButtonEventListener();
   }
 
   initProperties(player1, player2) {
@@ -25,11 +25,68 @@ class DOMManager {
     this.boundSetHover = this.setHover.bind(this);
     this.boundRemoveHover = this.removeHover.bind(this);
     this.boundPlaceShip = this.placeShip.bind(this);
+    this.boundMakeMove = this.makeMove.bind(this);
   }
 
-  setEventListeners() {
+  makeMove(event) {
+    const clickedCell = event.target;
+    if (clickedCell.classList.contains("p2-grid")) return;
+    const [x, y] = this.getCellCoordinates(clickedCell);
+
+    if (
+      this.currentPlayer === this.player1 &&
+      this.player1.makeMove(this.player2.gameboard, x, y)
+    ) {
+      this.updateUIGrid(this.player2);
+      this.switchPlayer();
+
+      if (this.isGameOver(this.player2)) {
+        alert("GAME OVER YOU WIN");
+        // Something to check if play again
+        return;
+      }
+    } else {
+      return;
+    }
+
+    setTimeout(() => {
+      this.makeAIMove();
+      if (this.isGameOver(this.player1)) {
+        alert("YOU LOSE");
+      }
+    }, 1000);
+  }
+
+  makeAIMove() {
+    this.player2.makeMove(this.player1.gameboard);
+    this.updateUIGrid(this.player1);
+    this.switchPlayer();
+  }
+
+  isGameOver(player) {
+    return player.gameboard.checkAllSunk();
+  }
+
+  showPlayAgain() {}
+
+  switchPlayer() {
+    this.currentPlayer =
+      this.currentPlayer === this.player1 ? this.player2 : this.player1;
+  }
+
+  setStartButtonEventListener() {
     const startButton = document.querySelector(".start-button");
     startButton.addEventListener("click", this.boundStartGameHandler);
+  }
+
+  setGridEventListeners(grid) {
+    grid.addEventListener("mouseover", this.boundSetHover);
+    grid.addEventListener("mouseout", this.boundRemoveHover);
+    grid.addEventListener("click", this.boundPlaceShip);
+  }
+
+  setMakeMoveEventListeners(grid) {
+    grid.addEventListener("click", this.boundMakeMove);
   }
 
   clearMain() {
@@ -39,7 +96,6 @@ class DOMManager {
   handleStartGame(e) {
     e.preventDefault();
     this.clearMain();
-    // const p1Grid = this.buildGrid(this.player1, "p1-grid");
     this.player1Grid = this.renderGrid(this.player1, "p1-grid");
     this.showFirstBoard(this.player1Grid);
     this.setGridEventListeners(this.player1Grid);
@@ -50,7 +106,7 @@ class DOMManager {
     this.renderBothBoards();
     this.updateUIGrid(this.player1);
     this.updateUIGrid(this.player2);
-    // generate AIboard
+    this.setMakeMoveEventListeners(this.player2Grid);
   }
 
   clearContainer() {
@@ -60,12 +116,18 @@ class DOMManager {
     }
   }
 
+  generateAIBoard() {
+    this.player2.gameboard.placeRandomShips();
+  }
+
   renderBothBoards() {
     const container =
       document.querySelector(".container") || document.createElement("div");
     container.className = "container";
 
     this.player1Grid = this.renderGrid(this.player1, "p1-grid");
+
+    this.player2.gameboard.placeRandomShips();
     this.player2Grid = this.renderGrid(this.player2, "p2-grid");
 
     container.appendChild(this.player1Grid);
@@ -103,6 +165,7 @@ class DOMManager {
         if (gridCell) {
           gridCell.className = "grid-cell"; // Reset classes
           if (content instanceof Ship) {
+            //&& player === this.player1
             gridCell.classList.add("placed");
           } else if (content === "HIT") {
             gridCell.classList.add("attacked");
@@ -197,7 +260,6 @@ class DOMManager {
     }
   }
 
-  // Add grey background to placed ships
   showPlacedShips(grid) {
     // Iterate through array and extract coordinates
     for (let x = 0; x < GRID_SIZE; x++) {
@@ -224,7 +286,6 @@ class DOMManager {
     });
   }
 
-  // Get the coordinates from DOM grid-cell
   getCellCoordinates(cell) {
     if (!cell) return;
     const coordinates = cell.getAttribute("data-coords");
@@ -235,12 +296,6 @@ class DOMManager {
   getGridCellFromCoords(x, y) {
     const cell = document.querySelector(`[data-coords="${x},${y}"]`);
     return cell;
-  }
-
-  setGridEventListeners(grid) {
-    grid.addEventListener("mouseover", this.boundSetHover);
-    grid.addEventListener("mouseout", this.boundRemoveHover);
-    grid.addEventListener("click", this.boundPlaceShip);
   }
 }
 export { DOMManager };
