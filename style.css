@@ -239,16 +239,27 @@ h2 {
 
 .sunk::after {
   content: "×";
-  font-size: 30px;
+  font-size: 4rem;
   color: white; /* Color of the "X" */
   position: absolute;
-  top: 50%;
+  top: 35%;
   left: 50%;
   transform: translate(-50%, -50%); /* Center the "X" */
 }
 
 .missed {
   background-color: var(--info-color);
+  position: relative;
+}
+
+.missed::after {
+  content: "⚪";
+  font-size: 30px;
+  color: white; /* Color of the "X" */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Center the "X" */
 }
 
 dialog {
