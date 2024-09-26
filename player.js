@@ -31,18 +31,11 @@ class AIStrategy {
 
   makeMove(oppBoard) {
     let x, y;
-    let validMove = false;
 
-    while (!validMove) {
-      if (this.huntMode) {
-        ({ x, y } = this.huntNextTarget(oppBoard));
-      } else {
-        ({ x, y } = this.randomAttack(oppBoard));
-      }
-
-      if (oppBoard.checkOnGrid(x, y) && this.isValidTarget(oppBoard, x, y)) {
-        validMove = true;
-      }
+    if (this.huntMode) {
+      ({ x, y } = this.huntNextTarget(oppBoard));
+    } else {
+      ({ x, y } = this.randomAttack(oppBoard));
     }
 
     const result = oppBoard.receiveAttack(x, y);
