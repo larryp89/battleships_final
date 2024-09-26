@@ -228,23 +228,23 @@ h2 {
 }
 
 .attacked {
-  background-color: var(--hit-color); /* Red when attacked */
+  background-color: var(--hit-color);
 }
 
 .sunk {
-  background-color: var(--hit-color); /* Background color for sunk state */
-  border: 1px solid white; /* Add a white border */
-  position: relative; /* Make it relative for positioning the "X" */
+  background-color: var(--hit-color);
+  border: 1px solid white; 
+  position: relative; 
 }
 
 .sunk::after {
   content: "×";
   font-size: 4rem;
-  color: white; /* Color of the "X" */
+  color: white; 
   position: absolute;
   top: 35%;
   left: 50%;
-  transform: translate(-50%, -50%); /* Center the "X" */
+  transform: translate(-50%, -50%); 
 }
 
 .missed {
