@@ -165,13 +165,16 @@ class DOMManager {
 
         if (gridCell) {
           gridCell.className = "grid-cell"; // Reset classes
+
           if (content instanceof Ship) {
-            //&& player === this.player1
-            gridCell.classList.add("placed");
+            console.log(content);
+            gridCell.classList.add("placed"); // Ship placed but not hit
           } else if (content === "HIT") {
-            gridCell.classList.add("attacked");
+            gridCell.classList.add("attacked"); // Red for hit
           } else if (content === "MISS") {
-            gridCell.classList.add("missed");
+            gridCell.classList.add("missed"); // Blue for miss
+          } else if (content === "SUNK") {
+            gridCell.classList.add("sunk"); // Yellow for sunk ship
           }
         }
       }

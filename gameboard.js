@@ -54,13 +54,13 @@ class Gameboard {
 
   // Place a ship at specific coordiantes
   placeShip(ship, x, y, isHorizontal) {
-    const shipLength = ship.length;
-
     // If the placement will be valid
     if (this.checkValidPlacement(ship, x, y, isHorizontal)) {
       for (let i = 0; i < ship.length; i++) {
         // Update the grid location with ship
         this.updateGrid(x, y, ship);
+        ship.updatePosition(x, y);
+
         if (isHorizontal) {
           x++;
         } else {
@@ -79,9 +79,24 @@ class Gameboard {
 
   receiveAttack(x, y) {
     const attackedCell = this.grid[y][x];
-    if (attackedCell === "HIT" || attackedCell === "MISS") return false; // Invalid move as already attacked
+    if (
+      attackedCell === "HIT" ||
+      attackedCell === "MISS" ||
+      attackedCell === "SUNK"
+    )
+      return false; // Invalid move as already attacked
+
     if (attackedCell instanceof Ship) {
       attackedCell.hit();
+      if (attackedCell.isSunk()) {
+        const updateArray = attackedCell.getPositions();
+        updateArray.forEach((gridRef) => {
+          const [newX, newY] = gridRef;
+          this.updateGrid(newX, newY, "SUNK");
+        });
+        return true;
+      }
+
       this.updateGrid(x, y, "HIT");
       return true; // Valid move (hit)
     } else {

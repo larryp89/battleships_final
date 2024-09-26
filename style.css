@@ -185,3 +185,7 @@ form {
 .missed {
   background-color: var(--info-color);
 }
+
+.sunk {
+  background-color: var(--warning-color);
+}
