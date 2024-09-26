@@ -23,9 +23,10 @@ class AIStrategy {
   constructor() {
     this.lastHit = null;
     this.huntMode = false;
-    this.huntDirections = ["up", "right", "down", "left"];
+    this.huntDirections = ["up", "down", "right", "left"];
     this.currentDirection = null;
     this.successfulHits = [];
+    this.firstHit = null;
   }
 
   makeMove(oppBoard) {
@@ -61,19 +62,19 @@ class AIStrategy {
       this.currentDirection = this.huntDirections.shift();
     }
 
-    const startPoint = this.lastHit || this.successfulHits[0];
-    let x = startPoint.x;
-    let y = startPoint.y;
+    const targetHit = this.successfulHits[this.successfulHits.length - 1];
+    let x = targetHit.x;
+    let y = targetHit.y;
 
     switch (this.currentDirection) {
       case "up":
         y--;
         break;
-      case "right":
-        x++;
-        break;
       case "down":
         y++;
+        break;
+      case "right":
+        x++;
         break;
       case "left":
         x--;
@@ -81,15 +82,17 @@ class AIStrategy {
     }
 
     if (!oppBoard.checkOnGrid(x, y) || !this.isValidTarget(oppBoard, x, y)) {
-      this.currentDirection = this.huntDirections.shift();
-      if (!this.currentDirection) {
-        this.resetHuntMode();
-        return this.randomAttack(oppBoard);
-      }
+      // If the current direction is not valid, reverse direction
+      this.reverseDirection();
       return this.huntNextTarget(oppBoard);
     }
 
     return { x, y };
+  }
+
+  reverseDirection() {
+    this.currentDirection = this.getOppositeDirection(this.currentDirection);
+    this.successfulHits = [this.firstHit];
   }
 
   isValidTarget(oppBoard, x, y) {
@@ -106,18 +109,18 @@ class AIStrategy {
       this.successfulHits.push({ x, y });
       if (!this.huntMode) {
         this.huntMode = true;
-        this.lastHit = { x, y };
-      } else {
-        this.lastHit = { x, y };
+        this.firstHit = { x, y };
+        this.checkSurroundingSquares(oppBoard, x, y);
       }
     } else if (cellContent === "MISS") {
       if (this.huntMode) {
-        this.currentDirection = null;
-        if (this.huntDirections.length === 0) {
-          if (this.successfulHits.length > 1) {
-            this.lastHit = this.successfulHits[0];
-            this.huntDirections = ["up", "right", "down", "left"];
-          } else {
+        if (this.successfulHits.length > 1) {
+          // Reverse direction and continue from the first hit
+          this.reverseDirection();
+        } else {
+          // If we've only had one hit, try the next direction
+          this.currentDirection = this.huntDirections.shift();
+          if (!this.currentDirection) {
             this.resetHuntMode();
           }
         }
@@ -127,10 +130,52 @@ class AIStrategy {
     }
   }
 
+  checkSurroundingSquares(oppBoard, x, y) {
+    const directions = ["up", "down", "right", "left"];
+    this.huntDirections = directions.filter((direction) => {
+      const { x: newX, y: newY } = this.getCoordinatesInDirection(
+        x,
+        y,
+        direction
+      );
+      return (
+        oppBoard.checkOnGrid(newX, newY) &&
+        this.isValidTarget(oppBoard, newX, newY)
+      );
+    });
+  }
+
+  getCoordinatesInDirection(x, y, direction) {
+    switch (direction) {
+      case "up":
+        return { x, y: y - 1 };
+      case "down":
+        return { x, y: y + 1 };
+      case "right":
+        return { x: x + 1, y };
+      case "left":
+        return { x: x - 1, y };
+    }
+  }
+
+  getOppositeDirection(direction) {
+    switch (direction) {
+      case "up":
+        return "down";
+      case "down":
+        return "up";
+      case "right":
+        return "left";
+      case "left":
+        return "right";
+    }
+  }
+
   resetHuntMode() {
     this.huntMode = false;
     this.lastHit = null;
-    this.huntDirections = ["up", "right", "down", "left"];
+    this.firstHit = null;
+    this.huntDirections = ["up", "down", "right", "left"];
     this.currentDirection = null;
     this.successfulHits = [];
   }

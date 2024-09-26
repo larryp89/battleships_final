@@ -346,9 +346,9 @@ class DOMManager {
 
     let message;
     if (this.isGameOver(this.player1)) {
-      message = "Better luck next time!";
+      message = "Oops, you lose. Better luck next time!";
     } else {
-      message = "Congratulations, you won!";
+      message = "Congratulations, you are a true champion!";
     }
 
     showMessage.textContent = message;
