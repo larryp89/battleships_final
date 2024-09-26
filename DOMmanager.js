@@ -191,7 +191,7 @@ class DOMManager {
         if (gridCell) {
           gridCell.className = "grid-cell"; // Reset classes
 
-          if (content instanceof Ship) {
+          if (content instanceof Ship && player === this.player1) {
             gridCell.classList.add("placed"); // Ship placed but not hit
           } else if (content === "HIT") {
             gridCell.classList.add("attacked"); // Red for hit
