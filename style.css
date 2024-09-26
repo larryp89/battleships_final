@@ -9,6 +9,11 @@
   --light-color: #f8f9fa;
   --dark-color: #343a40;
 
+  --water-color: #b9e0ff;
+  --ship-color: #5a5a5a;
+  --hit-color: #ff6b6b;
+  --miss-color: #ffffff;
+
   /* Typography */
   --font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -84,7 +89,7 @@ a:hover {
 }
 
 .button:hover {
-  background-color: var(--success-color);
+  background-color: rgb(31, 134, 162);
 }
 
 /* Forms */
@@ -127,11 +132,12 @@ select {
 /* HEADER */
 header {
   height: 8em;
-  background-color: var(--secondary-color);
+  background-color: #5891ac;
 }
 
 h1 {
   font-size: var(--font-size-large);
+  text-align: center;
 }
 
 /* MAIN */
@@ -144,8 +150,39 @@ main {
 
 /* FORM */
 form {
-  margin-top: 3rem;
-  width: 30%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  max-width: 300px;
+  margin-top: 2rem;
+  padding: 2rem;
+  background-color: #5891ac;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+label {
+  font-size: 1.2em;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1em;
+}
+
+button.start-button {
+  padding: 10px 20px;
+  font-size: 1em;
+  background-color: #2877bc;
+  color: white;
 }
 
 /* GRID */
@@ -161,31 +198,86 @@ form {
   height: 2.5rem;
   width: 2.5rem;
   border: 1px solid black;
-  background-color: #b9c8ca;
+  background-color: #2877bc41;
 }
 
-.container {
-  display: flex;
-  align-items: center;
-
-  gap: 5rem;
+h2 {
+  font-size: 1.5em;
+  color: #333;
+  text-align: center;
 }
+
 .highlight {
   background-color: green;
 }
 
+.container {
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  margin: 20px auto;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+}
+
 .placed {
-  background-color: var(--dark-color);
+  background-color: var(--ship-color);
 }
 
 .attacked {
-  background-color: var(--danger-color);
+  background-color: var(--hit-color); /* Red when attacked */
+}
+
+.sunk {
+  background-color: var(--hit-color); /* Background color for sunk state */
+  border: 1px solid white; /* Add a white border */
+  position: relative; /* Make it relative for positioning the "X" */
+}
+
+.sunk::after {
+  content: "×";
+  font-size: 30px;
+  color: white; /* Color of the "X" */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Center the "X" */
 }
 
 .missed {
   background-color: var(--info-color);
 }
 
-.sunk {
-  background-color: var(--warning-color);
+dialog {
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  padding: 2rem;
+  width: 100%;
+  margin: auto; /* Center horizontally */
+  position: fixed; /* Fix the position */
+  left: 50%; /* Center horizontally */
+  transform: translate(-50%, -50%); /* Adjust position to center */
+  text-align: center;
+}
+
+dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+dialog .button {
+  background-color: #4caf50;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+  text-transform: uppercase;
+  transition: background-color 0.3s ease;
+}
+
+dialog .button:hover {
+  background-color: #45a049;
 }

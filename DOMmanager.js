@@ -33,29 +33,25 @@ class DOMManager {
     if (clickedCell.classList.contains("p2-grid")) return;
     const [x, y] = this.getCellCoordinates(clickedCell);
 
-    if (
-      this.currentPlayer === this.player1 &&
-      this.player1.makeMove(this.player2.gameboard, x, y)
-    ) {
-      this.updateUIGrid(this.player2);
-      this.switchPlayer();
-
-      if (this.isGameOver(this.player2)) {
-        alert("GAME OVER YOU WIN");
-        this.showPlayAgain();
+    if (this.currentPlayer === this.player1) {
+      if (this.player1.makeMove(this.player2.gameboard, x, y)) {
+        this.updateUIGrid(this.player2);
+        if (this.isGameOver(this.player2)) {
+          this.showPlayAgain();
+          return;
+        }
+        this.switchPlayer();
+      } else {
         return;
       }
-    } else {
-      return;
-    }
 
-    setTimeout(() => {
-      this.makeAIMove();
-      if (this.isGameOver(this.player1)) {
-        alert("YOU LOSE");
-        this.showPlayAgain();
-      }
-    }, 1000);
+      setTimeout(() => {
+        this.makeAIMove();
+        if (this.isGameOver(this.player1)) {
+          this.showPlayAgain();
+        }
+      }, 1000);
+    }
   }
 
   makeAIMove() {
@@ -94,8 +90,17 @@ class DOMManager {
     this.main.innerHTML = "";
   }
 
+  getPlayerName() {
+    const inputField = document.querySelector("input");
+    if (!inputField) return;
+
+    const name = inputField.value;
+    this.player1.name = name;
+  }
+
   handleStartGame(e) {
     e.preventDefault();
+    this.getPlayerName();
     this.clearMain();
     this.player1Grid = this.renderGrid(this.player1, "p1-grid");
     this.showFirstBoard(this.player1Grid);
@@ -125,15 +130,35 @@ class DOMManager {
     const container =
       document.querySelector(".container") || document.createElement("div");
     container.className = "container";
+    container.style.display = "flex";
+    container.style.flexDirection = "row";
+    container.style.gap = "5rem";
 
+    // Create headers for each grid
+    const p1header = document.createElement("h2");
+    p1header.textContent = "Friendly waters";
+
+    const p2header = document.createElement("h2");
+    p2header.textContent = "Enemy territory";
+
+    // Create a wrapper for player 1 grid
+    const p1Wrapper = document.createElement("div");
+    p1Wrapper.appendChild(p1header);
     this.player1Grid = this.renderGrid(this.player1, "p1-grid");
+    p1Wrapper.appendChild(this.player1Grid);
 
+    // Create a wrapper for player 2 grid
+    const p2Wrapper = document.createElement("div");
+    p2Wrapper.appendChild(p2header);
     this.player2.gameboard.placeRandomShips();
     this.player2Grid = this.renderGrid(this.player2, "p2-grid");
+    p2Wrapper.appendChild(this.player2Grid);
 
-    container.appendChild(this.player1Grid);
-    container.appendChild(this.player2Grid);
+    // Append both wrappers to the container
+    container.appendChild(p1Wrapper);
+    container.appendChild(p2Wrapper);
 
+    // Finally append the container to the main section
     this.main.appendChild(container);
   }
 
@@ -167,7 +192,6 @@ class DOMManager {
           gridCell.className = "grid-cell"; // Reset classes
 
           if (content instanceof Ship) {
-            console.log(content);
             gridCell.classList.add("placed"); // Ship placed but not hit
           } else if (content === "HIT") {
             gridCell.classList.add("attacked"); // Red for hit
@@ -193,7 +217,12 @@ class DOMManager {
   showFirstBoard(board) {
     const container = document.createElement("div");
     container.className = "container";
+    container.style.display = "flex";
+    container.style.flexDirection = "column";
+
     const instruction = document.createElement("h2");
+    instruction.textContent = `Place your ships, ${this.player1.name}`;
+    console.log(this.player1.name);
 
     const rotateButton = document.createElement("button");
     rotateButton.textContent = "Rotate ship";
@@ -203,7 +232,6 @@ class DOMManager {
       this.isHorizontal = !this.isHorizontal;
     });
 
-    instruction.textContent = "Place your ships";
     container.appendChild(instruction);
     container.appendChild(rotateButton);
     container.appendChild(board);
@@ -312,10 +340,22 @@ class DOMManager {
     return cell;
   }
   showPlayAgain() {
+    const winner = this.currentPlayer; // this should be checked against the losing condition
     const dialog = document.createElement("dialog");
+    const showMessage = document.createElement("h2");
+
+    let message;
+    if (this.isGameOver(this.player1)) {
+      message = "Better luck next time!";
+    } else {
+      message = "Congratulations, you won!";
+    }
+
+    showMessage.textContent = message;
     const playAgainButton = document.createElement("button");
     playAgainButton.textContent = "Play again";
     playAgainButton.className = "button";
+    dialog.appendChild(showMessage);
     dialog.appendChild(playAgainButton);
     this.main.append(dialog);
 
