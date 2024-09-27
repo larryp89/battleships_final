@@ -8,3 +8,6 @@ This project is a Battleship game implemented using JavaScript and Vite. It incl
 - **Player**: Represents a player in the game, with a name and a strategy for making moves.
 - **HumanStrategy**: Allows a human player to make moves based on user input.
 - **AIStrategy**: Implements an AI player with a strategy that includes random attacks and a hunt mode for targeting ships.
+
+## Deployment
+Deployed using Vite.
